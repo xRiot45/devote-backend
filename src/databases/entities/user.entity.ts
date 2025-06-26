@@ -1,4 +1,4 @@
-import { RoleEnum } from 'src/enums/role.enum';
+import { RoleEnum } from '../..//enums/role.enum';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
@@ -17,14 +17,14 @@ export class User {
     @Column({
         type: 'varchar',
         length: 100,
-        nullable: false,
+        nullable: true,
     })
     name: string;
 
     @Column({
         type: 'varchar',
         length: 100,
-        nullable: false,
+        nullable: true,
     })
     email: string;
 
