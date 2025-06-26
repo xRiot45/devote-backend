@@ -7,8 +7,8 @@ import { AuthDto } from './dto/auth.dto';
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    @Post()
-    public async authWithWalletAddress(@Body() authDto: AuthDto): Promise<User> {
+    @Post('/wallet')
+    public async authWithWalletAddress(@Body() authDto: AuthDto): Promise<ApiResponse<User>> {
         return await this.authService.authWithWalletAddress(authDto);
     }
 }

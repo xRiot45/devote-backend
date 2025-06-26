@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../databases/entities/user.entity';
+
 import { AuthDto } from './dto/auth.dto';
 
 @Injectable()
@@ -11,19 +12,27 @@ export class AuthService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    public async authWithWalletAddress(authDto: AuthDto): Promise<User> {
+    public async authWithWalletAddress(createUserDto: AuthDto): Promise<ApiResponse<User>> {
         const existingUser = await this.userRepository.findOneBy({
-            walletAddress: authDto.walletAddress,
+            walletAddress: createUserDto.walletAddress,
         });
 
-        if (!existingUser) {
-            return await this.userRepository.save({
-                walletAddress: authDto.walletAddress,
-                email: authDto.email ?? '',
-                name: authDto.name ?? '',
-            });
+        if (existingUser) {
+            throw new ConflictException('User already exists');
         }
 
-        return existingUser;
+        const user = this.userRepository.create({
+            walletAddress: createUserDto.walletAddress,
+            name: createUserDto.name,
+            email: createUserDto.email,
+        });
+
+        await this.userRepository.save(user);
+
+        return {
+            success: true,
+            message: 'User created successfully',
+            data: user,
+        };
     }
 }
