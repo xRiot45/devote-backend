@@ -48,4 +48,12 @@ export class AuthService {
             },
         };
     }
+
+    public async validateUser(email: string) {
+        const user = await this.userRepository.findOneBy({
+            email,
+        });
+
+        return { id: user.id, email: user.email, role: user.role };
+    }
 }
