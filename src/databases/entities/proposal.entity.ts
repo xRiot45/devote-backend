@@ -1,5 +1,6 @@
 import { StatusEnum } from 'src/enums/status.enum';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { ProposalOption } from './proposal-option.entity';
 
 @Entity('proposals')
 export class Proposal {
@@ -65,6 +66,9 @@ export class Proposal {
         onUpdate: 'CURRENT_TIMESTAMP(6)',
     })
     updatedAt: Date;
+
+    @OneToMany(() => ProposalOption, (proposalOption) => proposalOption.proposal)
+    proposalOptions: ProposalOption[];
 
     constructor(partial: Partial<Proposal>) {
         Object.assign(this, partial);
