@@ -49,7 +49,7 @@ export class Proposal {
     @Column({
         type: 'enum',
         enum: StatusEnum,
-        default: StatusEnum.ACTIVE,
+        default: StatusEnum.DRAFT,
         nullable: false,
     })
     status: string | StatusEnum;
