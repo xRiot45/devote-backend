@@ -58,7 +58,9 @@ export class ProposalOption {
     })
     updatedAt: Date;
 
-    @ManyToOne(() => Proposal, (proposal) => proposal.proposalOptions)
+    @ManyToOne(() => Proposal, (proposal) => proposal.proposalOptions, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({ name: 'proposalId' })
     proposal: Proposal;
 

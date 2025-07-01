@@ -1,4 +1,15 @@
-import { Controller, Get, Param, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Query,
+    Req,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+} from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
@@ -31,7 +42,7 @@ export class ProposalsController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(AnyFilesInterceptor(createMulterConfig('proposals-images')))
+    @UseInterceptors(AnyFilesInterceptor(createMulterConfig('proposal-images')))
     public async create(
         @UploadedFiles() files: Express.Multer.File[],
         @Req() req: Request,
@@ -66,5 +77,11 @@ export class ProposalsController {
         };
 
         return this.proposalsService.create(proposalDto, user, files);
+    }
+
+    @Delete('/:proposalId')
+    @UseGuards(JwtAuthGuard)
+    public async remove(@Param('proposalId') proposalId: number): Promise<BaseResponse> {
+        return await this.proposalsService.remove(proposalId);
     }
 }

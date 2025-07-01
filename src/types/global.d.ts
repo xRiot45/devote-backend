@@ -25,6 +25,11 @@ declare global {
         readonly message: string;
         readonly data: T | PaginatedData<T>;
     }
+
+    export interface BaseResponse {
+        readonly success: boolean;
+        readonly message: string;
+    }
 }
 
 export {};

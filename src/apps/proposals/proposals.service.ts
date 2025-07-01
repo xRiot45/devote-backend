@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
@@ -92,6 +94,28 @@ export class ProposalsService {
             success: true,
             message: 'Proposal created successfully',
             data: fullProposal,
+        };
+    }
+
+    public async remove(proposalId: number): Promise<BaseResponse> {
+        const options = await this.proposalOptionRepository.find({
+            where: { proposal: { id: proposalId } },
+        });
+
+        for (const option of options) {
+            if (option.image) {
+                const imageFullPath = path.join(process.cwd(), 'uploads', 'proposal-images', option.image);
+                if (fs.existsSync(imageFullPath)) {
+                    fs.unlinkSync(imageFullPath);
+                }
+            }
+        }
+
+        await this.proposalOptionRepository.delete({ proposal: { id: proposalId } });
+        const result = await this.proposalRepository.delete(proposalId);
+        return {
+            success: result.affected > 0,
+            message: result.affected > 0 ? 'Proposal deleted successfully' : 'Proposal not found',
         };
     }
 }

@@ -67,7 +67,10 @@ export class Proposal {
     })
     updatedAt: Date;
 
-    @OneToMany(() => ProposalOption, (proposalOption) => proposalOption.proposal)
+    @OneToMany(() => ProposalOption, (proposalOption) => proposalOption.proposal, {
+        cascade: true,
+        onDelete: 'CASCADE',
+    })
     proposalOptions: ProposalOption[];
 
     constructor(partial: Partial<Proposal>) {
