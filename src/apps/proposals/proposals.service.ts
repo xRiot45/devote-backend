@@ -47,6 +47,19 @@ export class ProposalsService {
         };
     }
 
+    public async findById(proposalId: number): Promise<ApiResponse<Proposal>> {
+        const proposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        return {
+            success: true,
+            message: 'Proposal fetched by id successfully',
+            data: proposal,
+        };
+    }
+
     public async create(
         proposalDto: ProposalDto,
         user: User,

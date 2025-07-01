@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
@@ -21,6 +21,12 @@ export class ProposalsController {
         const limit = query.limit ?? 10;
 
         return await this.proposalsService.findAll(page, limit);
+    }
+
+    @Get('/:proposalId')
+    @UseGuards(JwtAuthGuard)
+    public async findById(@Param('proposalId') proposalId: number): Promise<ApiResponse<Proposal>> {
+        return await this.proposalsService.findById(proposalId);
     }
 
     @Post()
