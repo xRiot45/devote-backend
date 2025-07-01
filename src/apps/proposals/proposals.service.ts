@@ -15,15 +15,35 @@ export class ProposalsService {
         private readonly proposalOptionRepository: Repository<ProposalOption>,
     ) {}
 
-    public async findAll(): Promise<ApiResponse<Proposal[]>> {
-        const proposals = await this.proposalRepository.find({
+    public async findAll(page: number = 1, limit: number = 2): Promise<ApiResponse<Proposal>> {
+        const [items, total] = await this.proposalRepository.findAndCount({
             relations: ['proposalOptions'],
+            skip: (page - 1) * limit,
+            take: limit,
+            order: { createdAt: 'DESC' },
         });
+
+        const totalPages = Math.ceil(total / limit);
 
         return {
             success: true,
             message: 'Proposals fetched successfully',
-            data: proposals,
+            data: {
+                items,
+                meta: {
+                    totalItems: total,
+                    itemCount: items.length,
+                    itemsPerPage: limit,
+                    totalPages,
+                    currentPage: page,
+                },
+                links: {
+                    first: `?page=1&limit=${limit}`,
+                    previous: page > 1 ? `?page=${page - 1}&limit=${limit}` : null,
+                    next: page < totalPages ? `?page=${page + 1}&limit=${limit}` : null,
+                    last: `?page=${totalPages}&limit=${limit}`,
+                },
+            },
         };
     }
 
