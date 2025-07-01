@@ -15,6 +15,18 @@ export class ProposalsService {
         private readonly proposalOptionRepository: Repository<ProposalOption>,
     ) {}
 
+    public async findAll(): Promise<ApiResponse<Proposal[]>> {
+        const proposals = await this.proposalRepository.find({
+            relations: ['proposalOptions'],
+        });
+
+        return {
+            success: true,
+            message: 'Proposals fetched successfully',
+            data: proposals,
+        };
+    }
+
     public async create(
         proposalDto: ProposalDto,
         user: User,

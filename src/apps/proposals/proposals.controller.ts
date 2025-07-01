@@ -1,4 +1,4 @@
-import { Controller, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { createMulterConfig } from 'src/configs/multer.config';
@@ -12,6 +12,12 @@ import { ProposalsService } from './proposals.service';
 @Controller('proposals')
 export class ProposalsController {
     constructor(private readonly proposalsService: ProposalsService) {}
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    public async findAll(): Promise<ApiResponse<Proposal[]>> {
+        return await this.proposalsService.findAll();
+    }
 
     @Post()
     @UseGuards(JwtAuthGuard)
