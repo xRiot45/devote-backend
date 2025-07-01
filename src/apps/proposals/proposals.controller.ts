@@ -3,6 +3,7 @@ import {
     Delete,
     Get,
     Param,
+    Patch,
     Post,
     Query,
     Req,
@@ -77,6 +78,45 @@ export class ProposalsController {
         };
 
         return this.proposalsService.create(proposalDto, user, files);
+    }
+
+    @Patch('/:proposalId')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(AnyFilesInterceptor(createMulterConfig('proposal-images')))
+    public async update(
+        @UploadedFiles() files: Express.Multer.File[],
+        @Req() req: Request,
+        @Param('proposalId') proposalId: number,
+    ): Promise<ApiResponse<Proposal>> {
+        const body = req.body;
+
+        const parsedOptions = Object.keys(body)
+            .filter((key) => key.startsWith('options['))
+            .reduce((acc, key) => {
+                const match = key.match(/options\[(\d+)\]\.(\w+)/);
+                if (match) {
+                    const index = Number(match[1]);
+                    const field = match[2];
+                    acc[index] = acc[index] || {};
+                    acc[index][field] = body[key];
+                }
+                return acc;
+            }, []);
+
+        const proposalDto: ProposalDto = {
+            title: body.title,
+            description: body.description,
+            category: body.category,
+            startTime: new Date(body.startTime),
+            endTime: new Date(body.endTime),
+            options: parsedOptions.map((opt, i) => ({
+                ...opt,
+                order: Number(opt.order),
+                image: files.find((f) => f.fieldname === `image_${i}`)?.filename,
+            })),
+        };
+
+        return this.proposalsService.update(proposalId, proposalDto, files);
     }
 
     @Delete('/:proposalId')

@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
+import { StatusEnum } from 'src/enums/status.enum';
 import { Repository } from 'typeorm';
 import { ProposalDto } from './dto/proposal.dto';
 
@@ -97,6 +98,77 @@ export class ProposalsService {
         return {
             success: true,
             message: 'Proposal created successfully',
+            data: fullProposal,
+        };
+    }
+
+    public async update(
+        proposalId: number,
+        proposalDto: ProposalDto,
+        files: Express.Multer.File[],
+    ): Promise<ApiResponse<Proposal>> {
+        const proposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        if (!proposal) {
+            throw new NotFoundException('Proposal not found');
+        }
+
+        if (proposal?.status !== StatusEnum.DRAFT) {
+            throw new BadRequestException('Only draft proposals can be updated');
+        }
+
+        // Update data proposal utama
+        proposal.title = proposalDto.title;
+        proposal.description = proposalDto.description;
+        proposal.category = proposalDto.category;
+        proposal.startTime = proposalDto.startTime;
+        proposal.endTime = proposalDto.endTime;
+        await this.proposalRepository.save(proposal);
+
+        for (let i = 0; i < proposalDto.options.length; i++) {
+            const dtoOption = proposalDto.options[i];
+            const existingOption = proposal.proposalOptions[i];
+            const file = files.find((f) => f.fieldname === `image_${i}`);
+
+            // Jika ada file baru, hapus file lama (jika ada)
+            if (file && existingOption?.image) {
+                const imageFullPath = path.join(process.cwd(), 'uploads', 'proposal-images', existingOption.image);
+                if (fs.existsSync(imageFullPath)) {
+                    fs.unlinkSync(imageFullPath);
+                }
+            }
+
+            // Jika option sudah ada, update
+            if (existingOption) {
+                existingOption.label = dtoOption.label;
+                existingOption.description = dtoOption.description;
+                existingOption.order = dtoOption.order;
+                if (file) {
+                    existingOption.image = file.filename;
+                }
+
+                await this.proposalOptionRepository.save(existingOption);
+            } else {
+                const newOption = this.proposalOptionRepository.create({
+                    ...dtoOption,
+                    image: file?.filename,
+                    proposal,
+                });
+                await this.proposalOptionRepository.save(newOption);
+            }
+        }
+
+        const fullProposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        return {
+            success: true,
+            message: 'Proposal updated successfully',
             data: fullProposal,
         };
     }
