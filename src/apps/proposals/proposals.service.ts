@@ -16,23 +16,22 @@ export class ProposalsService {
     ) {}
 
     public async create(
-        createProposalDto: ProposalDto,
+        proposalDto: ProposalDto,
         user: User,
         files: Express.Multer.File[],
     ): Promise<ApiResponse<Proposal>> {
         const proposal = this.proposalRepository.create({
-            ...createProposalDto,
-            creatorWallet: user?.walletAddress,
+            ...proposalDto,
+            creatorWallet: user.walletAddress,
         });
 
         const savedProposal = await this.proposalRepository.save(proposal);
 
-        const options = createProposalDto.options.map((opt, index) => {
+        const options = proposalDto.options.map((option, index) => {
             const file = files.find((f) => f.fieldname === `image_${index}`);
             return this.proposalOptionRepository.create({
-                ...opt,
+                ...option,
                 image: file?.filename,
-                proposalId: savedProposal.id,
                 proposal: savedProposal,
             });
         });
