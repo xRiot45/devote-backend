@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -54,6 +54,10 @@ export class ProposalsService {
             where: { id: proposalId },
             relations: ['proposalOptions'],
         });
+
+        if (!proposal) {
+            throw new NotFoundException('Proposal not found');
+        }
 
         return {
             success: true,
