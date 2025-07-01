@@ -1,26 +1,53 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProposalDto } from './dto/create-proposal.dto';
-import { UpdateProposalDto } from './dto/update-proposal.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
+import { Proposal } from 'src/databases/entities/proposal.entity';
+import { User } from 'src/databases/entities/user.entity';
+import { Repository } from 'typeorm';
+import { ProposalDto } from './dto/proposal.dto';
 
 @Injectable()
 export class ProposalsService {
-    create(createProposalDto: CreateProposalDto) {
-        console.log(createProposalDto);
-    }
+    constructor(
+        @InjectRepository(Proposal)
+        private readonly proposalRepository: Repository<Proposal>,
+        @InjectRepository(ProposalOption)
+        private readonly proposalOptionRepository: Repository<ProposalOption>,
+    ) {}
 
-    findAll() {
-        return `This action returns all proposals`;
-    }
+    public async create(
+        createProposalDto: ProposalDto,
+        user: User,
+        files: Express.Multer.File[],
+    ): Promise<ApiResponse<Proposal>> {
+        const proposal = this.proposalRepository.create({
+            ...createProposalDto,
+            creatorWallet: user?.walletAddress,
+        });
 
-    findOne(id: number) {
-        return `This action returns a #${id} proposal`;
-    }
+        const savedProposal = await this.proposalRepository.save(proposal);
 
-    update(id: number, updateProposalDto: UpdateProposalDto) {
-        console.log(updateProposalDto);
-    }
+        const options = createProposalDto.options.map((opt, index) => {
+            const file = files.find((f) => f.fieldname === `image_${index}`);
+            return this.proposalOptionRepository.create({
+                ...opt,
+                image: file?.filename,
+                proposalId: savedProposal.id,
+                proposal: savedProposal,
+            });
+        });
 
-    remove(id: number) {
-        return `This action removes a #${id} proposal`;
+        await this.proposalOptionRepository.save(options);
+
+        const fullProposal = await this.proposalRepository.findOne({
+            where: { id: savedProposal.id },
+            relations: ['proposalOptions'],
+        });
+
+        return {
+            success: true,
+            message: 'Proposal created successfully',
+            data: fullProposal,
+        };
     }
 }

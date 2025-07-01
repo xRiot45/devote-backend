@@ -35,7 +35,7 @@ export class ProposalOption {
 
     @Column({
         type: 'text',
-        nullable: false,
+        nullable: true,
     })
     image: string;
 
