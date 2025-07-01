@@ -1,8 +1,10 @@
 import {
+    Body,
     Controller,
     Delete,
     Get,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
@@ -19,7 +21,7 @@ import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, ReorderProposalOptionsDto } from './dto/proposal.dto';
 import { ProposalsService } from './proposals.service';
 
 @Controller('proposals')
@@ -37,7 +39,7 @@ export class ProposalsController {
 
     @Get('/:proposalId')
     @UseGuards(JwtAuthGuard)
-    public async findById(@Param('proposalId') proposalId: number): Promise<ApiResponse<Proposal>> {
+    public async findById(@Param('proposalId', ParseIntPipe) proposalId: number): Promise<ApiResponse<Proposal>> {
         return await this.proposalsService.findById(proposalId);
     }
 
@@ -86,7 +88,7 @@ export class ProposalsController {
     public async update(
         @UploadedFiles() files: Express.Multer.File[],
         @Req() req: Request,
-        @Param('proposalId') proposalId: number,
+        @Param('proposalId', ParseIntPipe) proposalId: number,
     ): Promise<ApiResponse<Proposal>> {
         const body = req.body;
 
@@ -121,7 +123,16 @@ export class ProposalsController {
 
     @Delete('/:proposalId')
     @UseGuards(JwtAuthGuard)
-    public async remove(@Param('proposalId') proposalId: number): Promise<BaseResponse> {
+    public async remove(@Param('proposalId', ParseIntPipe) proposalId: number): Promise<BaseResponse> {
         return await this.proposalsService.remove(proposalId);
+    }
+
+    @Patch('/:proposalId/reorder-options')
+    @UseGuards(JwtAuthGuard)
+    async reorderProposalOptions(
+        @Param('proposalId', ParseIntPipe) proposalId: number,
+        @Body() dto: ReorderProposalOptionsDto,
+    ): Promise<BaseResponse> {
+        return await this.proposalsService.reorderOptions(proposalId, dto);
     }
 }

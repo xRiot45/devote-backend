@@ -7,7 +7,7 @@ import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
 import { StatusEnum } from 'src/enums/status.enum';
 import { Repository } from 'typeorm';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, ReorderProposalOptionsDto } from './dto/proposal.dto';
 
 @Injectable()
 export class ProposalsService {
@@ -192,6 +192,41 @@ export class ProposalsService {
         return {
             success: result.affected > 0,
             message: result.affected > 0 ? 'Proposal deleted successfully' : 'Proposal not found',
+        };
+    }
+
+    public async reorderOptions(proposalId: number, dto: ReorderProposalOptionsDto): Promise<ApiResponse<Proposal>> {
+        const proposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        if (!proposal) {
+            throw new NotFoundException('Proposal not found');
+        }
+
+        const proposalOptionIds = proposal.proposalOptions.map((option) => option.id);
+        const isValid = dto.options.every((opt) => proposalOptionIds.includes(opt.id));
+
+        if (!isValid) {
+            throw new BadRequestException('One or more proposal options are invalid');
+        }
+
+        const updatePromises = dto.options.map((opt) =>
+            this.proposalOptionRepository.update(opt.id, { order: opt.order }),
+        );
+
+        await Promise.all(updatePromises);
+
+        const fullProposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        return {
+            success: true,
+            message: 'Proposal options reordered successfully',
+            data: fullProposal,
         };
     }
 }

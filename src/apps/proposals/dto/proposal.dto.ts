@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { IsArray, IsDate, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 
 export class ProposalDto {
     @IsString()
@@ -37,6 +37,21 @@ export class ProposalOptionDto {
     @IsString()
     @IsOptional()
     image?: string;
+
+    @IsNumber()
+    order: number;
+}
+
+export class ReorderProposalOptionsDto {
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => OptionOrderDto)
+    options: OptionOrderDto[];
+}
+
+export class OptionOrderDto {
+    @IsNumber()
+    id: number;
 
     @IsNumber()
     order: number;
