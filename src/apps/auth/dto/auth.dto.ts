@@ -28,3 +28,9 @@ export class AuthDto {
     @IsEmail()
     readonly email: string;
 }
+
+export class AuthWithWalletResponse {
+    isNewUser: boolean;
+    accessToken: string;
+    refreshToken: string;
+}

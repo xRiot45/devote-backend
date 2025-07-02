@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, AuthWithWalletResponse } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,9 +11,9 @@ export class AuthController {
     public async authWithWalletAddress(
         @Body() body: AuthDto,
         @Res({ passthrough: true }) response: Response,
-    ): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
+    ): Promise<ApiResponse<AuthWithWalletResponse>> {
         const { data, message } = await this.authService.authWithWalletAddress(body);
-        const { accessToken, refreshToken } = data as { accessToken: string; refreshToken: string };
+        const { refreshToken } = data as { accessToken: string; refreshToken: string; isNewUser: boolean };
 
         response.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -25,10 +25,7 @@ export class AuthController {
         return {
             success: true,
             message,
-            data: {
-                accessToken,
-                refreshToken,
-            },
+            data,
         };
     }
 }

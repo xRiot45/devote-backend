@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../databases/entities/user.entity';
-import { AuthDto } from './dto/auth.dto';
+import { AuthDto, AuthWithWalletResponse } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,22 +13,32 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    public async authWithWalletAddress(
-        authDto: AuthDto,
-    ): Promise<ApiResponse<{ accessToken: string; refreshToken: string }>> {
-        const existingUser = await this.userRepository.findOneBy({ walletAddress: authDto.walletAddress });
+    public async authWithWalletAddress(authDto: AuthDto): Promise<ApiResponse<AuthWithWalletResponse>> {
+        const existingUser = await this.userRepository.findOneBy({
+            walletAddress: authDto.walletAddress,
+        });
 
         let user = existingUser;
+        const isNewUser = !existingUser;
 
-        if (!existingUser) {
-            user = await this.userRepository.save({
+        if (isNewUser) {
+            await this.userRepository.save({
                 walletAddress: authDto.walletAddress,
                 name: authDto.name,
                 email: authDto.email,
             });
+
+            user = await this.userRepository.findOneBy({
+                walletAddress: authDto.walletAddress,
+            });
         }
 
-        const payload = { id: user.id, walletAddress: user.walletAddress, role: user.role };
+        const payload = {
+            id: user!.id,
+            walletAddress: user!.walletAddress,
+            role: user!.role,
+        };
+
         const accessToken = this.jwtService.sign(
             { ...payload, tokenType: 'access' },
             { secret: process.env.JWT_ACCESS_TOKEN_SECRET as string },
@@ -36,13 +46,17 @@ export class AuthService {
 
         const refreshToken = this.jwtService.sign(
             { ...payload, tokenType: 'refresh' },
-            { secret: process.env.JWT_REFRESH_TOKEN_SECRET as string, expiresIn: 7 * 24 * 60 * 60 },
+            {
+                secret: process.env.JWT_REFRESH_TOKEN_SECRET as string,
+                expiresIn: 7 * 24 * 60 * 60,
+            },
         );
 
         return {
             success: true,
-            message: existingUser ? 'User logged in successfully' : 'User created successfully',
+            message: isNewUser ? 'User created successfully' : 'User logged in successfully',
             data: {
+                isNewUser,
                 accessToken,
                 refreshToken,
             },
