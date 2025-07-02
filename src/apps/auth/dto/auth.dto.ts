@@ -1,21 +1,31 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class AuthDto {
+export class AuthWithWalletDto {
     @IsNotEmpty()
     @IsString()
-    readonly walletAddress: string;
+    walletAddress: string;
 
     @IsOptional()
     @IsString()
-    readonly name: string;
+    name?: string;
 
     @IsOptional()
     @IsEmail()
-    readonly email: string;
+    email?: string;
 }
 
 export class AuthWithWalletResponse {
     isNewUser: boolean;
     accessToken: string;
     refreshToken: string;
+}
+
+export class CheckWalletDto {
+    @IsNotEmpty()
+    @IsString()
+    walletAddress: string;
+}
+
+export class CheckWalletResponse {
+    isRegistered: boolean;
 }

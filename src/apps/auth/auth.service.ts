@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../databases/entities/user.entity';
-import { AuthDto, AuthWithWalletResponse } from './dto/auth.dto';
+import { AuthWithWalletDto, AuthWithWalletResponse, CheckWalletDto, CheckWalletResponse } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -13,27 +13,27 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    public async authWithWalletAddress(authDto: AuthDto): Promise<ApiResponse<AuthWithWalletResponse>> {
+    public async authWithWalletAddress(request: AuthWithWalletDto): Promise<ApiResponse<AuthWithWalletResponse>> {
         const existingUser = await this.userRepository.findOneBy({
-            walletAddress: authDto.walletAddress,
+            walletAddress: request.walletAddress,
         });
 
         let user = existingUser;
         const isNewUser = !existingUser;
 
         if (isNewUser) {
-            if (!authDto.name || !authDto.email) {
+            if (!request.name || !request.email) {
                 throw new BadRequestException('Name and email are required for new users');
             }
 
             await this.userRepository.save({
-                walletAddress: authDto.walletAddress,
-                name: authDto.name,
-                email: authDto.email,
+                walletAddress: request.walletAddress,
+                name: request.name,
+                email: request.email,
             });
 
             user = await this.userRepository.findOneBy({
-                walletAddress: authDto.walletAddress,
+                walletAddress: request.walletAddress,
             });
         }
 
@@ -63,6 +63,20 @@ export class AuthService {
                 isNewUser,
                 accessToken,
                 refreshToken,
+            },
+        };
+    }
+
+    public async checkWalletAddress(request: CheckWalletDto): Promise<ApiResponse<CheckWalletResponse>> {
+        const existingUser = await this.userRepository.findOneBy({
+            walletAddress: request.walletAddress,
+        });
+
+        return {
+            success: true,
+            message: 'User found',
+            data: {
+                isRegistered: !!existingUser,
             },
         };
     }
