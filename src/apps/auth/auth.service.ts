@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,6 +22,10 @@ export class AuthService {
         const isNewUser = !existingUser;
 
         if (isNewUser) {
+            if (!authDto.name || !authDto.email) {
+                throw new BadRequestException('Name and email are required for new users');
+            }
+
             await this.userRepository.save({
                 walletAddress: authDto.walletAddress,
                 name: authDto.name,
