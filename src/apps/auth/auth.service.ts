@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../databases/entities/user.entity';
-import { AuthWithWalletDto, AuthWithWalletResponse, CheckWalletDto, CheckWalletResponse } from './dto/auth.dto';
+import { AuthWithWalletDto, AuthWithWalletResponse, CheckWalletResponse } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -67,9 +67,9 @@ export class AuthService {
         };
     }
 
-    public async checkWalletAddress(request: CheckWalletDto): Promise<ApiResponse<CheckWalletResponse>> {
+    public async checkWalletAddress(walletAddress: string): Promise<ApiResponse<CheckWalletResponse>> {
         const existingUser = await this.userRepository.findOneBy({
-            walletAddress: request.walletAddress,
+            walletAddress: walletAddress,
         });
 
         return {

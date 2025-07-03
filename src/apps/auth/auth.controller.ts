@@ -1,7 +1,7 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { AuthWithWalletDto, AuthWithWalletResponse, CheckWalletDto, CheckWalletResponse } from './dto/auth.dto';
+import { AuthWithWalletDto, AuthWithWalletResponse, CheckWalletResponse } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +29,10 @@ export class AuthController {
         };
     }
 
-    @Post('/wallet/check')
-    public async checkWalletAddress(@Body() body: CheckWalletDto): Promise<ApiResponse<CheckWalletResponse>> {
-        return await this.authService.checkWalletAddress(body);
+    @Get('/wallet/check')
+    public async checkWalletAddress(
+        @Query('walletAddress') walletAddress: string,
+    ): Promise<ApiResponse<CheckWalletResponse>> {
+        return await this.authService.checkWalletAddress(walletAddress);
     }
 }
