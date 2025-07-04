@@ -1,11 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import { join } from 'path';
 import { MainModule } from './main.module';
 
 async function bootstrap() {
-    const app = await NestFactory.create(MainModule, {
+    const app = await NestFactory.create<NestExpressApplication>(MainModule, {
         cors: true,
     });
 
@@ -17,6 +19,10 @@ async function bootstrap() {
             transform: true,
         }),
     );
+
+    app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+        prefix: '/uploads/',
+    });
 
     const config = new DocumentBuilder()
         .setTitle('DeVote Off-Chain API')
