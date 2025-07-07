@@ -229,4 +229,24 @@ export class ProposalsService {
             data: fullProposal,
         };
     }
+
+    public async updateStatus(proposalId: number, status: StatusEnum): Promise<ApiResponse<Proposal>> {
+        const proposal = await this.proposalRepository.findOne({
+            where: { id: proposalId },
+            relations: ['proposalOptions'],
+        });
+
+        if (!proposal) {
+            throw new NotFoundException('Proposal not found');
+        }
+
+        proposal.status = status;
+        await this.proposalRepository.save(proposal);
+
+        return {
+            success: true,
+            message: 'Proposal status updated successfully',
+            data: proposal,
+        };
+    }
 }

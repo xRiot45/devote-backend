@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsDate, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { StatusEnum } from 'src/enums/status.enum';
 
 export class ProposalDto {
     @IsString()
@@ -55,4 +56,9 @@ export class OptionOrderDto {
 
     @IsNumber()
     order: number;
+}
+
+export class UpdateProposalStatusDto {
+    @IsEnum(StatusEnum)
+    status: StatusEnum;
 }

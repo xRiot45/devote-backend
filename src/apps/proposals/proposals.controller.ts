@@ -7,6 +7,7 @@ import {
     ParseIntPipe,
     Patch,
     Post,
+    Put,
     Query,
     Req,
     UploadedFiles,
@@ -21,7 +22,7 @@ import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
-import { ProposalDto, ReorderProposalOptionsDto } from './dto/proposal.dto';
+import { ProposalDto, ReorderProposalOptionsDto, UpdateProposalStatusDto } from './dto/proposal.dto';
 import { ProposalsService } from './proposals.service';
 
 @Controller('proposals')
@@ -134,5 +135,14 @@ export class ProposalsController {
         @Body() dto: ReorderProposalOptionsDto,
     ): Promise<BaseResponse> {
         return await this.proposalsService.reorderOptions(proposalId, dto);
+    }
+
+    @Put('/:proposalId/status')
+    @UseGuards(JwtAuthGuard)
+    async updateStatus(
+        @Param('proposalId', ParseIntPipe) proposalId: number,
+        @Body() body: UpdateProposalStatusDto,
+    ): Promise<BaseResponse> {
+        return await this.proposalsService.updateStatus(proposalId, body.status);
     }
 }
