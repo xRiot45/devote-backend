@@ -8,7 +8,6 @@ import {
     Patch,
     Post,
     Put,
-    Query,
     Req,
     UploadedFiles,
     UseGuards,
@@ -16,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { PaginationQueryDto } from 'src/common/dto/pagination.dto';
 import { createMulterConfig } from 'src/configs/multer.config';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
@@ -29,13 +27,20 @@ import { ProposalsService } from './proposals.service';
 export class ProposalsController {
     constructor(private readonly proposalsService: ProposalsService) {}
 
-    @Get()
-    @UseGuards(JwtAuthGuard)
-    public async findAll(@Query() query: PaginationQueryDto): Promise<ApiResponse<Proposal>> {
-        const page = query.page ?? 1;
-        const limit = query.limit ?? 10;
+    // TODO: Find All With Pagination
+    // @Get()
+    // @UseGuards(JwtAuthGuard)
+    // public async findAll(@Query() query: PaginationQueryDto): Promise<ApiResponse<Proposal>> {
+    //     const page = query.page ?? 1;
+    //     const limit = query.limit ?? 10;
 
-        return await this.proposalsService.findAll(page, limit);
+    //     return await this.proposalsService.findAll(page, limit);
+    // }
+
+    @Get()
+    @UseGuards()
+    public async findAll(): Promise<ApiResponse<Proposal[]>> {
+        return await this.proposalsService.findAll();
     }
 
     @Get('/:proposalId')

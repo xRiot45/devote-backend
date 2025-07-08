@@ -6,7 +6,7 @@ import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
 import { StatusEnum } from 'src/enums/status.enum';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ProposalDto, ReorderProposalOptionsDto } from './dto/proposal.dto';
 
 @Injectable()
@@ -18,35 +18,50 @@ export class ProposalsService {
         private readonly proposalOptionRepository: Repository<ProposalOption>,
     ) {}
 
-    public async findAll(page: number = 1, limit: number = 2): Promise<ApiResponse<Proposal>> {
-        const [items, total] = await this.proposalRepository.findAndCount({
+    // TODO: Find All With Pagination
+    // public async findAll(page: number = 1, limit: number = 2): Promise<ApiResponse<Proposal>> {
+    //     const [items, total] = await this.proposalRepository.findAndCount({
+    //         relations: ['proposalOptions'],
+    //         skip: (page - 1) * limit,
+    //         take: limit,
+    //         order: { createdAt: 'DESC' },
+    //     });
+
+    //     const totalPages = Math.ceil(total / limit);
+
+    //     return {
+    //         success: true,
+    //         message: 'Proposals fetched successfully',
+    //         data: {
+    //             items,
+    //             meta: {
+    //                 totalItems: total,
+    //                 itemCount: items.length,
+    //                 itemsPerPage: limit,
+    //                 totalPages,
+    //                 currentPage: page,
+    //             },
+    //             links: {
+    //                 first: `?page=1&limit=${limit}`,
+    //                 previous: page > 1 ? `?page=${page - 1}&limit=${limit}` : null,
+    //                 next: page < totalPages ? `?page=${page + 1}&limit=${limit}` : null,
+    //                 last: `?page=${totalPages}&limit=${limit}`,
+    //             },
+    //         },
+    //     };
+    // }
+
+    public async findAll(): Promise<ApiResponse<Proposal[]>> {
+        const proposals = await this.proposalRepository.find({
+            where: { status: In([StatusEnum.DRAFT, StatusEnum.CANCELLED]) },
             relations: ['proposalOptions'],
-            skip: (page - 1) * limit,
-            take: limit,
             order: { createdAt: 'DESC' },
         });
-
-        const totalPages = Math.ceil(total / limit);
 
         return {
             success: true,
             message: 'Proposals fetched successfully',
-            data: {
-                items,
-                meta: {
-                    totalItems: total,
-                    itemCount: items.length,
-                    itemsPerPage: limit,
-                    totalPages,
-                    currentPage: page,
-                },
-                links: {
-                    first: `?page=1&limit=${limit}`,
-                    previous: page > 1 ? `?page=${page - 1}&limit=${limit}` : null,
-                    next: page < totalPages ? `?page=${page + 1}&limit=${limit}` : null,
-                    last: `?page=${totalPages}&limit=${limit}`,
-                },
-            },
+            data: proposals,
         };
     }
 
