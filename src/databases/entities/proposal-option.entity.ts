@@ -4,9 +4,11 @@ import {
     Entity,
     JoinColumn,
     ManyToOne,
+    OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
+import { ProposalVotes } from './proposal-votes';
 import { Proposal } from './proposal.entity';
 
 @Entity('proposal_options')
@@ -63,6 +65,11 @@ export class ProposalOption {
     })
     @JoinColumn({ name: 'proposalId' })
     proposal: Proposal;
+
+    @OneToMany(() => ProposalVotes, (vote) => vote.option, {
+        onDelete: 'CASCADE',
+    })
+    votes: ProposalVotes[];
 
     constructor(partial: Partial<ProposalOption>) {
         Object.assign(this, partial);

@@ -1,6 +1,7 @@
 import { StatusEnum } from 'src/enums/status.enum';
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { ProposalOption } from './proposal-option.entity';
+import { ProposalVotes } from './proposal-votes';
 
 @Entity('proposals')
 export class Proposal {
@@ -72,6 +73,11 @@ export class Proposal {
         onDelete: 'CASCADE',
     })
     proposalOptions: ProposalOption[];
+
+    @OneToMany(() => ProposalVotes, (vote) => vote.proposal, {
+        onDelete: 'CASCADE',
+    })
+    votes: ProposalVotes[];
 
     constructor(partial: Partial<Proposal>) {
         Object.assign(this, partial);
