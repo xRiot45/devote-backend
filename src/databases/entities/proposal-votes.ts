@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ProposalOption } from './proposal-option.entity';
 import { Proposal } from './proposal.entity';
 
@@ -33,9 +33,9 @@ export class ProposalVotes {
     })
     txHash: string;
 
-    @CreateDateColumn({
+    @Column({
         type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP(6)',
+        nullable: false,
     })
     votedAt: Date;
 }
