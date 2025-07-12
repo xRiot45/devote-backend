@@ -22,12 +22,6 @@
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "txHash",
-        "type": "string"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "votedAt",
         "type": "uint256"

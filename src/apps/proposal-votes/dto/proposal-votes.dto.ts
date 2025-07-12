@@ -1,11 +1,20 @@
-import { IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class LogVoteDto {
+    @IsNumber()
     proposalId: number;
+
+    @IsNumber()
     optionId: number;
+
+    @IsString()
+    @IsNotEmpty()
     voterAddress: string;
+
+    @IsString()
+    @IsNotEmpty()
     txHash: string;
 
-    @IsOptional()
-    votedAt?: Date;
+    @IsNumber()
+    votedAt: number;
 }

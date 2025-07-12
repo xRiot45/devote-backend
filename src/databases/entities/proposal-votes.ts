@@ -36,6 +36,7 @@ export class ProposalVotes {
     @Column({
         type: 'timestamp',
         nullable: false,
+        default: () => 'CURRENT_TIMESTAMP',
     })
     votedAt: Date;
 }

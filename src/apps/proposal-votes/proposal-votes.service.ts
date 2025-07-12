@@ -1,8 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProposalVotes } from 'src/databases/entities/proposal-votes';
 import { Repository } from 'typeorm';
 import { LogVoteDto } from './dto/proposal-votes.dto';
+import { Proposal } from 'src/databases/entities/proposal.entity';
+import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 
 @Injectable()
 export class ProposalVotesService {
@@ -24,13 +26,24 @@ export class ProposalVotesService {
             throw new ConflictException('User has already voted for this proposal');
         }
 
-        const vote = this.proposalVotesRepository.create(request);
-        const savedVote = await this.proposalVotesRepository.save(vote);
+        try {
+            const vote = this.proposalVotesRepository.create({
+                voterAddress: request.voterAddress,
+                txHash: request.txHash,
+                proposal: { id: request.proposalId } as Proposal,
+                option: { id: request.optionId } as ProposalOption,
+                votedAt: new Date(request.votedAt * 1000),
+            });
 
-        return {
-            success: true,
-            message: 'Vote logged successfully',
-            data: savedVote,
-        };
+            const savedVote = await this.proposalVotesRepository.save(vote);
+
+            return {
+                success: true,
+                message: 'Vote logged successfully',
+                data: savedVote,
+            };
+        } catch (error) {
+            throw new InternalServerErrorException('Gagal menyimpan proposal vote', error);
+        }
     }
 }
