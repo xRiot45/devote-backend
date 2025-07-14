@@ -1,10 +1,10 @@
 import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { ProposalVotes } from 'src/databases/entities/proposal-votes';
+import { Proposal } from 'src/databases/entities/proposal.entity';
 import { Repository } from 'typeorm';
 import { LogVoteDto } from './dto/proposal-votes.dto';
-import { Proposal } from 'src/databases/entities/proposal.entity';
-import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 
 @Injectable()
 export class ProposalVotesService {
@@ -17,7 +17,6 @@ export class ProposalVotesService {
         const existing = await this.proposalVotesRepository.findOne({
             where: {
                 proposal: { id: request.proposalId },
-                option: { id: request.optionId },
                 voterAddress: request.voterAddress,
             },
         });
