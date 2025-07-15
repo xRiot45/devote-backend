@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ProposalVotes } from 'src/databases/entities/proposal-votes';
-import { LogVoteDto, VoteResult } from './dto/proposal-votes.dto';
+import { LogVoteDto } from './dto/proposal-votes.dto';
 import { ProposalVotesService } from './proposal-votes.service';
 
 @Controller('proposal-votes')
@@ -18,12 +18,5 @@ export class ProposalVotesController {
         @Query('voterAddress') voterAddress: string,
     ): Promise<ApiResponse<{ hasVoted: boolean }>> {
         return await this.proposalVotesService.hasUserVote(proposalId, voterAddress);
-    }
-
-    @Get('/:proposalId')
-    public async resultVoteByProposal(
-        @Param('proposalId', ParseIntPipe) proposalId: number,
-    ): Promise<ApiResponse<VoteResult[]>> {
-        return await this.proposalVotesService.resultVoteByProposal(proposalId);
     }
 }

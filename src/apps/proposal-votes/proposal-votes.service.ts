@@ -4,7 +4,7 @@ import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { ProposalVotes } from 'src/databases/entities/proposal-votes';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { DataSource, Repository } from 'typeorm';
-import { LogVoteDto, VoteResult } from './dto/proposal-votes.dto';
+import { LogVoteDto } from './dto/proposal-votes.dto';
 
 @Injectable()
 export class ProposalVotesService {
@@ -61,28 +61,6 @@ export class ProposalVotesService {
             data: {
                 hasVoted: !!existingVote,
             },
-        };
-    }
-
-    public async resultVoteByProposal(proposalId: number): Promise<ApiResponse<VoteResult[]>> {
-        const rawResults = await this.dataSource
-            .getRepository(ProposalVotes)
-            .createQueryBuilder('vote')
-            .select('vote.optionId', 'optionId')
-            .addSelect('COUNT(*)', 'totalVotes')
-            .where('vote.proposalId = :proposalId', { proposalId })
-            .groupBy('vote.optionId')
-            .getRawMany();
-
-        const results: VoteResult[] = rawResults.map((row) => ({
-            optionId: Number(row.optionId),
-            totalVotes: Number(row.totalVotes),
-        }));
-
-        return {
-            success: true,
-            message: 'Vote result fetched successfully',
-            data: results,
         };
     }
 }
