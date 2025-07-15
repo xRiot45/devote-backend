@@ -8,12 +8,12 @@ export class ProposalVotesController {
     constructor(private readonly proposalVotesService: ProposalVotesService) {}
 
     @Post()
-    async logVoteFromSmartContract(@Body() request: LogVoteDto): Promise<ApiResponse<ProposalVotes>> {
+    public async logVoteFromSmartContract(@Body() request: LogVoteDto): Promise<ApiResponse<ProposalVotes>> {
         return await this.proposalVotesService.logVoteFromSmartContract(request);
     }
 
     @Get('/:proposalId')
-    async resultVoteByProposal(
+    public async resultVoteByProposal(
         @Param('proposalId', ParseIntPipe) proposalId: number,
     ): Promise<ApiResponse<VoteResult[]>> {
         return await this.proposalVotesService.resultVoteByProposal(proposalId);
