@@ -47,6 +47,23 @@ export class ProposalVotesService {
         }
     }
 
+    public async hasUserVote(proposalId: number, voterAddress: string): Promise<ApiResponse<{ hasVoted: boolean }>> {
+        const existingVote = await this.proposalVotesRepository.findOne({
+            where: {
+                proposal: { id: proposalId },
+                voterAddress: voterAddress.toLowerCase(),
+            },
+        });
+
+        return {
+            success: true,
+            message: 'Vote result fetched successfully',
+            data: {
+                hasVoted: !!existingVote,
+            },
+        };
+    }
+
     public async resultVoteByProposal(proposalId: number): Promise<ApiResponse<VoteResult[]>> {
         const rawResults = await this.dataSource
             .getRepository(ProposalVotes)
