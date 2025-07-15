@@ -64,7 +64,7 @@ export class ProposalVotesService {
 
         return {
             success: true,
-            message: 'Proposal votes fetched successfully',
+            message: 'Vote result fetched successfully',
             data: results,
         };
     }
