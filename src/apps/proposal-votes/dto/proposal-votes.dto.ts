@@ -18,3 +18,8 @@ export class LogVoteDto {
     @IsNumber()
     votedAt: number;
 }
+
+export class VoteResult {
+    optionId: number;
+    totalVotes: number;
+}

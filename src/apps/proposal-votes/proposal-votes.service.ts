@@ -3,14 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ProposalOption } from 'src/databases/entities/proposal-option.entity';
 import { ProposalVotes } from 'src/databases/entities/proposal-votes';
 import { Proposal } from 'src/databases/entities/proposal.entity';
-import { Repository } from 'typeorm';
-import { LogVoteDto } from './dto/proposal-votes.dto';
+import { DataSource, Repository } from 'typeorm';
+import { LogVoteDto, VoteResult } from './dto/proposal-votes.dto';
 
 @Injectable()
 export class ProposalVotesService {
     constructor(
         @InjectRepository(ProposalVotes)
         private readonly proposalVotesRepository: Repository<ProposalVotes>,
+        private readonly dataSource: DataSource,
     ) {}
 
     public async logVoteFromSmartContract(request: LogVoteDto): Promise<ApiResponse<ProposalVotes>> {
@@ -44,5 +45,27 @@ export class ProposalVotesService {
         } catch (error) {
             throw new InternalServerErrorException('Gagal menyimpan proposal vote', error);
         }
+    }
+
+    public async resultVoteByProposal(proposalId: number): Promise<ApiResponse<VoteResult[]>> {
+        const rawResults = await this.dataSource
+            .getRepository(ProposalVotes)
+            .createQueryBuilder('vote')
+            .select('vote.optionId', 'optionId')
+            .addSelect('COUNT(*)', 'totalVotes')
+            .where('vote.proposalId = :proposalId', { proposalId })
+            .groupBy('vote.optionId')
+            .getRawMany();
+
+        const results: VoteResult[] = rawResults.map((row) => ({
+            optionId: Number(row.optionId),
+            totalVotes: Number(row.totalVotes),
+        }));
+
+        return {
+            success: true,
+            message: 'Proposal votes fetched successfully',
+            data: results,
+        };
     }
 }
