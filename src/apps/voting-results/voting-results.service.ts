@@ -16,7 +16,7 @@ export class VotingResultsService {
 
     public async findAll(): Promise<ApiResponse<Proposal[]>> {
         const votingSession = await this.proposalRepository.find({
-            where: { status: In([StatusEnum.ENDED, StatusEnum.ENDED]) },
+            where: { status: In([StatusEnum.ENDED]) },
             relations: ['proposalOptions'],
             order: { createdAt: 'DESC' },
         });
