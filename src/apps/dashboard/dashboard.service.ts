@@ -5,6 +5,7 @@ import { ProposalVotes } from 'src/databases/entities/proposal-votes';
 import { Proposal } from 'src/databases/entities/proposal.entity';
 import { User } from 'src/databases/entities/user.entity';
 import { Repository } from 'typeorm';
+import { DashboardSummaryDto } from './dto/dashboard.dto';
 
 @Injectable()
 export class DashboardService {
@@ -22,7 +23,7 @@ export class DashboardService {
         private readonly optionRepository: Repository<ProposalOption>,
     ) {}
 
-    async getSummary() {
+    async getSummary(): Promise<ApiResponse<DashboardSummaryDto>> {
         const [totalUsers, totalProposals, totalVotes, totalProposalOptions] = await Promise.all([
             this.userRepository.count(),
             this.proposalRepository.count(),
@@ -31,10 +32,14 @@ export class DashboardService {
         ]);
 
         return {
-            totalUsers,
-            totalProposals,
-            totalVotes,
-            totalProposalOptions,
+            success: true,
+            message: 'Dashboard summary fetched successfully',
+            data: {
+                totalUsers,
+                totalProposals,
+                totalVotes,
+                totalProposalOptions,
+            },
         };
     }
 }
